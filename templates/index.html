@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Medical Chatbot</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        height: 100vh;
+        background: radial-gradient(circle at top, #30356b, #0a0d18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+    }
+
+    /* Main Chat Panel */
+    .chat-wrapper {
+        width: 50%;
+        max-width: 1050px;
+        height: 90vh;
+        background: linear-gradient(135deg, #151a2b, #0c1020);
+        border-radius: 20px;
+        box-shadow:
+            0 50px 90px rgba(0,0,0,0.7),
+            inset 0 0 0 1px rgba(255,255,255,0.06);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* Header */
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 26px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0));
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #facc15;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .avatar img {
+        width: 125%;
+        height: 125%;
+        object-fit: cover;
+    }
+
+    .avatar::after {
+        content: "";
+        position: absolute;
+        bottom: 3px;
+        right: 3px;
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border-radius: 50%;
+        border: 2px solid #0c1020;
+    }
+
+    .header-text h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .header-text span {
+        font-size: 12px;
+        color: #b3b8ff;
+    }
+
+    /* Chat Area */
+    .chat-area {
+        flex: 1;
+        padding: 34px;
+        overflow-y: auto;
+        background:
+            radial-gradient(circle at top left, rgba(99,102,241,0.08), transparent 60%),
+            radial-gradient(circle at bottom right, rgba(139,92,246,0.08), transparent 60%);
+    }
+
+    /* MESSAGE FIX */
+    .message {
+        width: fit-content;
+        max-width: 65%;
+        padding: 14px 18px;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        font-size: 14px;
+        line-height: 1.55;
+        word-wrap: break-word;
+    }
+
+    .bot {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+        backdrop-filter: blur(6px);
+    }
+
+    /* SHINE REMOVED */
+    .user {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        margin-left: auto;
+    }
+
+    /* Input Bar */
+    .chat-input {
+        padding: 20px 26px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        gap: 16px;
+        background: rgba(8,12,28,0.95);
+    }
+
+    .chat-input input {
+        flex: 1;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: none;
+        outline: none;
+        background: rgba(255,255,255,0.08);
+        color: white;
+        font-size: 14px;
+    }
+
+    .chat-input input::placeholder {
+        color: #9ca3af;
+    }
+
+    .send-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: white;
+        transition: transform 0.15s ease;
+    }
+
+    .send-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .chat-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-area::-webkit-scrollbar-thumb {
+        background: #4f46e5;
+        border-radius: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="chat-wrapper">
+
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="avatar">
+            <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="Doctor">
+        </div>
+        <div class="header-text">
+            <h3>Medical Chatbot</h3>
+            <span>Ask me anything!</span>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-area" id="chatBox">
+        <div class="message bot">
+            Hello! I’m your AI medical assistant. How can I help you today?
+        </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input">
+        <input
+            id="userInput"
+            type="text"
+            placeholder="Type your message..."
+            onkeydown="if(event.key === 'Enter') sendMessage()"
+        />
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+
+</div>
+
+<script>
+async function sendMessage() {
+    const inputField = document.getElementById("userInput");
+    const chatBox = document.getElementById("chatBox");
+    const userText = inputField.value.trim();
+
+    if (!userText) return;
+
+    /* 1️⃣ Show user message immediately */
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    userMsg.textContent = userText;
+    chatBox.appendChild(userMsg);
+
+    inputField.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    /* 2️⃣ Show typing indicator */
+    const typingMsg = document.createElement("div");
+    typingMsg.className = "message bot";
+    typingMsg.textContent = "Typing...";
+    chatBox.appendChild(typingMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    /* 3️⃣ Send user input to Flask backend */
+    const response = await fetch("/get", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "input=" + encodeURIComponent(userText)
+    });
+
+    /* 4️⃣ Receive chatbot reply */
+    const botReply = await response.text();
+
+    /* 5️⃣ Replace typing with actual response */
+    typingMsg.remove();
+
+    const botMsg = document.createElement("div");
+    botMsg.className = "message bot";
+    botMsg.textContent = botReply;
+    chatBox.appendChild(botMsg);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+</body>
+</html>
