@@ -5,6 +5,7 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import MessagesPlaceholder
 from dotenv import load_dotenv
 from src.prompt import *
 import os
@@ -18,7 +19,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-
+chat_history = []
 embeddings=download_embeddings()
 index_name = "medicare-ai"
 docsearch = PineconeVectorStore.from_existing_index(
@@ -30,6 +31,7 @@ chatModel = ChatOpenAI(model="gpt-4.1-nano")
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
 
     ])
@@ -45,9 +47,11 @@ def index():
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     input=request.form["input"]
-    print(input)
-    response=rag_chain.invoke({"input": input})
-    print("Response: ", response["answer"])
+
+    response=rag_chain.invoke({"input": input, "chat_history": chat_history})
+    chat_history.append(("human", input))
+    chat_history.append(("assistant", response["answer"]))
+
     return str(response["answer"])
 
 
