@@ -52,7 +52,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name : Stop and remove any old container if in use
+      - name : Stop and remove any old container if there
         run: |
           docker stop medicare-ai || true
           docker rm medicare-ai || true
